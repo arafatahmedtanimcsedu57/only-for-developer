@@ -2,9 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 
-import { Button } from '@/components/ui/button';
 import {
 	Table,
 	TableBody,
@@ -13,14 +11,28 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
+import {
+	Pagination,
+	PaginationContent,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
+} from '@/components/ui/pagination';
 import { Modal } from '@/components/ui/modal';
 
 import { getOrganizations } from '@/services/organizations';
 
 import type { Organization } from '@/types/organization';
+import {
+	CheckIcon,
+	CrossIcon,
+	MapPinCheckIcon,
+	ShieldIcon,
+} from 'lucide-react';
+import Header from './_components/Header';
 
 export default function DashboardPage() {
-	const router = useRouter();
 	const [page, setPage] = useState<number>(0);
 
 	const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -81,11 +93,6 @@ export default function DashboardPage() {
 		if (organizations.length) fetchLogos();
 	}, [organizations]);
 
-	const handleLogout = () => {
-		localStorage.removeItem('token');
-		router.push('/');
-	};
-
 	const openModalWithProviders = (
 		providers: Organization['locations'][0]['providers'],
 	) => {
@@ -100,85 +107,144 @@ export default function DashboardPage() {
 
 	return (
 		<div className="min-h-screen flex flex-col">
-			<header className="text-white p-4 flex justify-between items-center">
-				<h1 className="text-xl font-bold">Dashboard</h1>
-				<Button onClick={handleLogout}>Logout</Button>
-			</header>
+			<Header />
 			<main className="flex-grow p-6">
-				{loadingOrganizations ? (
-					<p>Loading...</p>
-				) : (
-					<>
-						<p className="text-xs text-red-500 mb-2">{organizationsError}</p>
+				<div className="p-6 border rounded-xl flex flex-col gap-6 bg-slate-100">
+					<div>
+						<h2 className="text-lg text-slate-900">Organizations</h2>
+						<p className="text-xs text-slate-600">
+							List of organizations with admins information
+						</p>
+					</div>
+					<div className="border rounded-lg bg-white">
+						{loadingOrganizations ? (
+							<p>Loading...</p>
+						) : (
+							<>
+								<p className="text-xs text-red-500 mb-2">
+									{organizationsError}
+								</p>
 
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Organization</TableHead>
-									<TableHead>Active</TableHead>
-									<TableHead>Locations</TableHead>
-									<TableHead>Admins</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{organizations.map((org) => (
-									<TableRow key={org.id}>
-										<TableCell>
-											<div className="flex flex-col gap-2">
-												{logos[org.id] ? (
-													<div className="p-4 border rounded-lg w-fit">
-														<img
-															src={logos[org.id]}
-															alt="Organization Logo"
-															loading="lazy"
-															width={'100px'}
-															style={{ aspectRatio: 'auto' }}
-														/>
+								<Table>
+									<TableHeader>
+										<TableRow>
+											<TableHead className="ps-6">ORGANIZATION</TableHead>
+											<TableHead>ACTIVE</TableHead>
+											<TableHead>LOCATIONS</TableHead>
+											<TableHead className="pe-6">ADMINS</TableHead>
+										</TableRow>
+									</TableHeader>
+
+									<TableBody>
+										{organizations.map((org) => (
+											<TableRow key={org.id}>
+												<TableCell className="ps-6">
+													<div className="flex flex-row items-center gap-2">
+														{logos[org.id] ? (
+															<div className="w-[40px] h-[40px] border rounded-full overflow-hidden flex items-center justify-center">
+																<img
+																	src={logos[org.id]}
+																	alt="Organization Logo"
+																	loading="lazy"
+																	className=" object-fill"
+																/>
+															</div>
+														) : (
+															<p></p>
+														)}
+														<p className="text-xs font-semibold text-blue-600">
+															{org.name}
+														</p>
 													</div>
-												) : (
-													<p></p>
-												)}
-												<p className="text-xs font-semibold">{org.name}</p>
-											</div>
-										</TableCell>
-										<TableCell>{org.active ? 'Yes' : 'No'}</TableCell>
-										<TableCell>
-											{org.locations.map((loc) => (
-												<p key={loc.id}>
-													<span
-														className="cursor-pointer text-blue-500"
-														onClick={() =>
-															openModalWithProviders(loc.providers)
-														}
-													>
-														{loc.name}
-													</span>
-												</p>
-											))}
-										</TableCell>
-										<TableCell>
-											{org.organizationAdmins.map((admin) => (
-												<p key={admin.id}>{admin.email}</p>
-											))}
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
+												</TableCell>
 
-						{/* Pagination Controls */}
-						<div className="flex justify-between mt-4">
-							<Button
-								disabled={page === 0}
-								onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-							>
-								Previous
-							</Button>
-							<span>Page {page + 1}</span>
-							<Button onClick={() => setPage((prev) => prev + 1)}>Next</Button>
-						</div>
-					</>
-				)}
+												<TableCell>
+													{org.active ? (
+														<CheckIcon size={16} className="text-green-600" />
+													) : (
+														<CrossIcon size={16} />
+													)}
+												</TableCell>
+
+												<TableCell>
+													<div className="flex flex-col gap-3">
+														{org.locations.map((loc) => (
+															<p key={loc.id}>
+																<span
+																	className="cursor-pointer text-xs text-slate-700"
+																	onClick={() =>
+																		openModalWithProviders(loc.providers)
+																	}
+																>
+																	<div className="flex gap-2 items-center text-slate-500 text-xs">
+																		<MapPinCheckIcon
+																			size={24}
+																			className="text-purple-600"
+																		/>
+																		<div>
+																			<p className="text-sm text-slate-800">
+																				{loc.name}
+																			</p>
+																			<p>{loc.address.detail || '...'}</p>
+																			<p>
+																				{loc.address.city || '...'},{' '}
+																				{loc.address.state || '...'},{' '}
+																				{loc.address.zip || '...'}
+																			</p>
+																		</div>
+																	</div>
+																</span>
+															</p>
+														))}
+													</div>
+												</TableCell>
+
+												<TableCell className="pe-6">
+													<div className="flex flex-col gap-3 ">
+														{org.organizationAdmins.map((admin) => (
+															<div
+																key={admin.id}
+																className="flex gap-2 items-center text-slate-900 text-xs"
+															>
+																<ShieldIcon
+																	size={16}
+																	className="text-orange-600"
+																/>
+																<p>{admin.email}</p>
+															</div>
+														))}
+													</div>
+												</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+
+								{/* Pagination Controls */}
+							</>
+						)}
+					</div>
+
+					<Pagination className="flex justify-end">
+						<PaginationContent>
+							<PaginationItem className="cursor-pointer">
+								<PaginationPrevious
+									onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+								/>
+							</PaginationItem>
+
+							<PaginationItem>
+								<PaginationLink href="#" isActive>
+									{page + 1}
+								</PaginationLink>
+							</PaginationItem>
+
+							<PaginationItem className="cursor-pointer">
+								<PaginationNext onClick={() => setPage((prev) => prev + 1)} />
+							</PaginationItem>
+						</PaginationContent>
+					</Pagination>
+				</div>
 			</main>
 
 			{/* Modal */}
