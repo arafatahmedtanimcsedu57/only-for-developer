@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  CheckIcon,
-  CrossIcon,
-  MapPinCheckIcon,
-  MessageCircleWarningIcon,
-  ShieldIcon,
-} from "lucide-react";
+import { CheckIcon, MapPinCheckIcon, ShieldIcon, XIcon } from "lucide-react";
 
 import {
   Table,
@@ -19,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import TablePagination from "./TablePagination";
 import ProviderModal from "./ProviderModal";
+import NotFound from "./NotFound";
 
 import { useOrganizations } from "./../_hooks/useOrganizations";
 import { useOrganizationLogos } from "../_hooks/useOrganizationLogos";
@@ -32,7 +27,13 @@ const OrganizationsTable = () => {
     Organization["locations"][0]["providers"]
   >([]);
 
-  const { organizations, loading, error } = useOrganizations(page);
+  const {
+    organizations,
+    loading,
+    error,
+    updatingOrgIds,
+    updateActiveStatusOrganization,
+  } = useOrganizations(page);
   const logos = useOrganizationLogos(organizations);
 
   const openModalWithProviders = (
@@ -76,7 +77,7 @@ const OrganizationsTable = () => {
                 <TableBody>
                   {!!organizations.length ? (
                     organizations.map((org) => (
-                      <TableRow key={org.id}>
+                      <TableRow key={org.id} aria-disabled>
                         <TableCell className="ps-6">
                           <div className="flex flex-row items-center gap-2">
                             {logos[org.id] ? (
@@ -99,16 +100,36 @@ const OrganizationsTable = () => {
 
                         <TableCell>
                           {org.active ? (
-                            <CheckIcon size={16} className="text-green-600" />
+                            <CheckIcon
+                              size={16}
+                              className="text-green-600 cursor-pointer"
+                              onClick={() => {
+                                console.log(org);
+                                updateActiveStatusOrganization(
+                                  { ...org, active: !org.active },
+                                  page
+                                );
+                              }}
+                            />
                           ) : (
-                            <CrossIcon size={16} />
+                            <XIcon
+                              size={16}
+                              className="text-rose-600 cursor-pointer"
+                              onClick={() => {
+                                console.log(org);
+                                updateActiveStatusOrganization(
+                                  { ...org, active: !org.active },
+                                  page
+                                );
+                              }}
+                            />
                           )}
                         </TableCell>
 
                         <TableCell>
                           <div className="flex flex-col gap-3">
                             {org.locations.map((loc) => (
-                              <p key={loc.id}>
+                              <div key={loc.id}>
                                 <span
                                   className="cursor-pointer text-xs text-slate-700"
                                   onClick={() =>
@@ -133,7 +154,7 @@ const OrganizationsTable = () => {
                                     </div>
                                   </div>
                                 </span>
-                              </p>
+                              </div>
                             ))}
                           </div>
                         </TableCell>
@@ -157,20 +178,11 @@ const OrganizationsTable = () => {
                       </TableRow>
                     ))
                   ) : (
-                    <div className="p-6 border mt-6 rounded-lg bg-rose-100 flex gap-4 items-center">
-                      <MessageCircleWarningIcon
-                        className="text-rose-600"
-                        size={32}
-                      />
-                      <div className="flex flex-col">
-                        <p className="text-lg text-rose-600 font-semibold">
-                          No Data
-                        </p>
-                        <p className="text-rose-500">
-                          No Organization record found
-                        </p>
-                      </div>
-                    </div>
+                    <TableRow>
+                      <TableCell>
+                        <NotFound text={"No Organization record found"} />
+                      </TableCell>
+                    </TableRow>
                   )}
                 </TableBody>
               </Table>

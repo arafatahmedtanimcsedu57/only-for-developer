@@ -30,3 +30,41 @@ export const getOrganizations = async ({ page }: { page: string }) => {
     };
   }
 };
+
+export const updateOrganization = async ({
+  organization,
+}: {
+  organization: Organization;
+}) => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const apiPath = process.env.NEXT_PUBLIC_API_PATH;
+  const apiVersion = process.env.NEXT_PUBLIC_API_VERSION;
+
+  try {
+    const response = await fetch(
+      `${baseUrl}/${apiPath}/${apiVersion}/${ORGANIZATION}/${organization.id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...organization }),
+      }
+    );
+
+    const data = await response.json();
+    if (data.success)
+      return { success: true, data: data.data as Organization[] };
+    else
+      return {
+        success: false,
+        message: data.message || "Something Went Wrong",
+      };
+  } catch (error: unknown) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "An error occurred. Please try again.",
+    };
+  }
+};
