@@ -1,3 +1,5 @@
+import { Organization } from "./organization";
+
 export type AppointmentStatus =
   | "IN_PROGRESS"
   | "NOT_VISITED"
@@ -21,6 +23,8 @@ export interface Appointment {
   cliFormFormResponseId: string;
   cliAppointmentLink: string;
   digiregAppointmentLink: string | null;
+
+  organization: Organization
 }
 
 export interface AppointmentResponse {

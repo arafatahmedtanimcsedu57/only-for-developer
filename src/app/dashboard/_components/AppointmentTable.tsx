@@ -52,26 +52,36 @@ export default function AppointmentTable() {
         </p>
       </div>
       <div className="flex gap-4 mb-4">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline">{format(startDate, "yyyy-MM-dd")}</Button>
-          </PopoverTrigger>
-          <PopoverContent>
-            <Calendar
-              mode="single"
-              selected={startDate}
-              onSelect={setStartDate}
-            />
-          </PopoverContent>
-        </Popover>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline">{format(endDate, "yyyy-MM-dd")}</Button>
-          </PopoverTrigger>
-          <PopoverContent>
-            <Calendar mode="single" selected={endDate} onSelect={setEndDate} />
-          </PopoverContent>
-        </Popover>
+        
+       <div className="flex gap-4 items-center flex-wrap">
+        <div className="flex gap-4 items-center">
+        <div>From</div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline">{format(startDate, "yyyy-MM-dd")}</Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <Calendar
+                mode="single"
+                selected={startDate}
+                onSelect={setStartDate}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div>~</div>
+        <div className="flex gap-4 items-center">
+          <div>To</div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline">{format(endDate, "yyyy-MM-dd")}</Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <Calendar mode="single" selected={endDate} onSelect={setEndDate} />
+            </PopoverContent>
+          </Popover>
+        </div>
+       </div>
       </div>
 
       <div className="border rounded-lg bg-white p-6">
@@ -88,6 +98,7 @@ export default function AppointmentTable() {
                   <TableHead>Date</TableHead>
                   <TableHead>CLI</TableHead>
                   <TableHead>DIGI</TableHead>
+                  <TableHead>Organization</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -134,6 +145,10 @@ export default function AppointmentTable() {
                             <>...</>
                           )}
                         </div>
+                      </TableCell>
+
+                      <TableCell>
+                        {appointment.organization.name}
                       </TableCell>
                     </TableRow>
                   ))
